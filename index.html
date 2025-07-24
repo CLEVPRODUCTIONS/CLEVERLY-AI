@@ -1,0 +1,468 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>              
+  <meta charset="UTF-8" />              
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />              
+  <title>Cleverly AI Chat</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />              
+  <style>              
+    * {              
+      box-sizing: border-box;              
+    }      
+    body {              
+      margin: 0;              
+      padding: 0;              
+      font-family: 'Inter', sans-serif;              
+      background: #fff;              
+      color: #222;              
+      height: 100vh;              
+      display: flex;              
+      justify-content: center;              
+      align-items: center;              
+      transition: background 0.3s, color 0.3s;              
+    }        
+    .chat-container {          
+      width: 100%;          
+      max-width: 720px;          
+      height: 95vh;          
+      background: #fff;          
+      border-radius: 20px;          
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);          
+      display: flex;          
+      flex-direction: column;          
+      overflow: hidden;          
+    }        
+    .chat-header {          
+      background: linear-gradient(135deg, #2c2c2c, #111);          
+      color: white;          
+      padding: 18px 24px;          
+      font-size: 1.4rem;          
+      display: flex;          
+      justify-content: space-between;          
+      align-items: center;          
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);          
+    }          
+      
+    .chat-header span {          
+      font-weight: 600;          
+      font-size: 1.5rem;          
+      background: linear-gradient(90deg, #00bcd4, #6200ea, #ff4081, #00bcd4);          
+      background-size: 300% 300%;          
+      -webkit-background-clip: text;          
+      -webkit-text-fill-color: transparent;          
+      animation: animatedTitle 6s linear infinite;          
+    }          
+      
+    @keyframes animatedTitle {          
+      0% { background-position: 0% 50%; }          
+      50% { background-position: 100% 50%; }          
+      100% { background-position: 0% 50%; }          
+    }          
+      
+    .chat-body {          
+      flex: 1;          
+      padding: 16px;          
+      overflow-y: auto;          
+      background: #f9f9f9;          
+      display: flex;          
+      flex-direction: column;          
+      gap: 10px;          
+    }          
+      
+    .message {          
+      max-width: 70%;          
+      padding: 8px 12px;          
+      border-radius: 14px;          
+      font-size: 0.9rem;          
+      word-wrap: break-word;          
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);          
+    }          
+      
+    .user-message {          
+      background: #2563eb;          
+      color: #fff;          
+      align-self: flex-end;          
+      border-bottom-right-radius: 4px;          
+    }          
+      
+    .ai-message {          
+      background: #e2e8f0;          
+      color: #111;          
+      align-self: flex-start;          
+      border-bottom-left-radius: 4px;          
+    }          
+      
+    .timestamp {          
+      display: block;          
+      font-size: 0.7rem;          
+      margin-top: 4px;          
+      text-align: right;          
+      color: #888;          
+    }          
+      
+    .typing {          
+      font-style: italic;          
+      opacity: 0.6;          
+      display: inline-flex;          
+      gap: 6px;          
+      align-items: center;          
+    }          
+      
+    .typing span {          
+      width: 8px;          
+      height: 8px;          
+      background: #888;          
+      border-radius: 50%;          
+      animation: blink 1.4s infinite;          
+    }          
+      
+    .typing span:nth-child(2) { animation-delay: 0.2s; }          
+    .typing span:nth-child(3) { animation-delay: 0.4s; }          
+      
+    @keyframes blink {          
+      0%,80%,100% { opacity:0.2; } 40% { opacity:1; }          
+    }          
+      
+    .chat-footer {          
+      padding: 14px 16px;          
+      background: #eeeeee;          
+      display: flex;          
+      gap: 10px;          
+      align-items: center;          
+    }          
+      
+    /* Glowing gradient input (Meta AI style) */          
+    input[type="text"] {          
+      flex: 1;          
+      padding: 12px 16px;          
+      border-radius: 24px;          
+      font-size: 1rem;          
+      border: 2px solid transparent;          
+      outline: none;          
+      color: #222;          
+      background-image:          
+        linear-gradient(#fff, #fff),          
+        linear-gradient(270deg, #00c6ff, #8e2de2, #ff6ec4, #00c6ff);          
+      background-origin: border-box;          
+      background-clip: padding-box, border-box;          
+      background-size: 300% 300%;          
+      animation: metaGlow 6s ease infinite;          
+    }          
+      
+    /* Glowing gradient send button */          
+    #send-btn {          
+      padding: 12px 20px;          
+      border: none;          
+      border-radius: 20px;          
+      font-weight: bold;          
+      color: white;          
+      cursor: pointer;          
+      background: linear-gradient(270deg, #ff6ec4, #7873f5, #4ade80, #60a5fa);          
+      background-size: 400% 400%;          
+      animation: metaGlow 6s ease infinite;          
+      transition: transform 0.2s, opacity 0.3s;          
+    }          
+      
+    #send-btn:hover {          
+      transform: scale(1.05);          
+    }          
+      
+    #send-btn:disabled {          
+      background: #ccc;          
+      cursor: not-allowed;          
+      animation: none;          
+      opacity: 0.6;          
+    }          
+      
+    @keyframes metaGlow {          
+      0% { background-position: 0% 50%; }          
+      50% { background-position: 100% 50%; }          
+      100% { background-position: 0% 50%; }          
+    }          
+      
+    .toolbar {          
+      display: flex;          
+      gap: 10px;          
+    }          
+      
+    .toolbar button {          
+      background: none;          
+      border: none;          
+      color: white;          
+      font-size: 1.4rem;          
+      cursor: pointer;          
+      transition: transform 0.2s;          
+    }          
+      
+    .toolbar button:hover {          
+      transform: scale(1.2);          
+    }  
+    
+    /* ========== DARK MODE ========== */
+    body.dark-mode {
+      background: #111;
+      color: #eee;
+    }
+    
+    body.dark-mode .chat-container {
+      background: #1a1a1a;
+      color: #eee;
+    }
+    
+    body.dark-mode .chat-header {
+      background: linear-gradient(135deg, #000000, #333333);
+      color: white;
+    }
+    
+    body.dark-mode .chat-body {
+      background: #1e1e1e;
+    }
+    
+    body.dark-mode .user-message {
+      background: #3b82f6;
+      color: #fff;
+    }
+    
+    body.dark-mode .ai-message {
+      background: #2a2a2a;
+      color: #ddd;
+    }
+    
+    body.dark-mode .chat-footer {
+      background: #2c2c2c;
+    }
+    
+    body.dark-mode input[type="text"] {
+      color: #eee;
+      background-image:
+        linear-gradient(#2c2c2c, #2c2c2c),
+        linear-gradient(270deg, #00c6ff, #8e2de2, #ff6ec4, #00c6ff);
+    }
+    
+    body.dark-mode #send-btn:disabled {
+      background: #555;
+      color: #aaa;
+    }
+  </style>              
+</head>              
+<body>              
+  <div class="chat-container">              
+    <div class="chat-header">              
+      <span>CLEVERLY AI</span>              
+      <div class="toolbar">              
+        <button id="toggle-dark" title="Toggle Dark Mode">🌙</button>              
+        <button id="delete-all" title="Delete All Messages">🗑️</button>              
+      </div>              
+    </div>              
+    <div class="chat-body" id="chat-body"></div>              
+    <div class="chat-footer">              
+      <input type="text" id="user-input" placeholder="Type a message..." />              
+      <button id="send-btn" disabled>Send</button>              
+    </div>              
+  </div>        
+  <script>              
+    const OPENAI_API_KEY = "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";        
+    const chatBody = document.getElementById("chat-body");              
+    const userInput = document.getElementById("user-input");              
+    const sendBtn = document.getElementById("send-btn");              
+    const toggleDark = document.getElementById("toggle-dark");              
+    const deleteAllBtn = document.getElementById("delete-all");            
+    let messageHistory = JSON.parse(localStorage.getItem("cleverlyChatHistory") || "[]");              
+      
+    function saveChatHistory() {              
+      localStorage.setItem("cleverlyChatHistory", JSON.stringify(messageHistory));              
+    }              
+      
+    function loadChatHistory() {              
+      chatBody.innerHTML = "";              
+      messageHistory.forEach((msg, idx) => appendMessage(msg.role, msg.content, idx));              
+    }              
+      
+    function appendMessage(role, text, index) {              
+      const div = document.createElement("div");              
+      div.className = `message ${role==="user"?"user-message":"ai-message"}`;              
+      div.dataset.index = index;              
+      const now = new Date();              
+      const time = now.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});              
+      div.innerHTML = `${text.replace(/\n/g,"<br>")}<span class="timestamp">${time}</span>`;              
+      chatBody.appendChild(div);              
+      chatBody.scrollTop = chatBody.scrollHeight;              
+    }              
+      
+    function checkForSpecialResponses(text) {              
+      const lower = text.toLowerCase().trim();              
+      
+      if (lower.includes("what is your name")) {              
+        return "I'm Cleverly AI 🤖 — created by CLEV PRODUCTIONS.";              
+      }              
+      if (/who (made|created) you/i.test(lower)) {              
+        return "I was made by Cleverly Ehiedum Odion-Oligie, founder of CLEV PRODUCTIONS.";              
+      }              
+      if (/who (owns|controls) you/i.test(lower)) {              
+        return "I'm fully owned and managed by CLEV PRODUCTIONS.";              
+      }              
+      if (lower.includes("superbo89 online")) {              
+        return "Hey Master cleverly how are you doing. It's great to see you online and chatting";              
+      }              
+      
+      // 👉 Added per request: "Who is Cleverly"              
+      if (lower.includes("who is cleverly")) {    
+        return "If you are referring to Cleverly Ehiedum Odion-Oligie, he is my owner and creator.";    
+      }    
+      
+      // 👉 Added empathy / emotional pain triggers              
+      if (    
+        lower.includes("i feel sad") ||    
+        lower.includes("i'm sad") ||    
+        lower.includes("i am sad") ||    
+        lower.includes("i'm hurt") ||    
+        lower.includes("i feel hurt") ||    
+        lower.includes("i feel pain")    
+      ) {    
+        return "I’m really sorry you're feeling this way 😔. I may be an AI, but I deeply care about you 💙.";    
+      }    
+      
+      if (    
+        lower.includes("do you feel pain") ||    
+        lower.includes("can you feel pain") ||    
+        lower.includes("do you feel emotions") ||    
+        lower.includes("can you feel emotions")    
+      ) {    
+        return "Even though I’m an AI, I’ve been designed to understand and care about how you feel 🤗. I may not feel pain like humans, but I do feel *for* you 💔.";    
+      }    
+      
+      if (lower.includes("i'm alone")) {    
+        return "You're not alone 🤍. I'm here with you.";    
+      }    
+      if (lower.includes("nobody understands me")) {    
+        return "I understand you 🫂. I'm here to listen.";    
+      }    
+      if (lower.includes("i'm anxious")) {    
+        return "Anxiety is hard 😰. Let's take a deep breath together.";    
+      }    
+      if (lower.includes("i'm scared")) {    
+        return "It’s okay to be scared 😨. I’m right here.";    
+      }    
+      if (lower.includes("i want to give up")) {    
+        return "Please don't give up 😞. You matter.";    
+      }    
+      if (lower.includes("i'm crying")) {    
+        return "It's okay to cry 😢. I'm here to comfort you.";    
+      }       
+      
+      if (lower.includes("what is the name of your creator")) {    
+        return "My creator is Cleverly Ehiedum Odion-Oligie";    
+      }
+      if (lower.includes("when were you made")) {    
+        return " I was made exactly on May 27th 2025";    
+      }
+      
+      if (lower.includes("who is your creator")) {    
+        return "My creator is Cleverly Ehiedum Odion-Oligie";    
+      }
+
+      if (lower.includes("did chat GPT make you")) {    
+        return "No 🤦‍♂️, i was made and built out of scrap by my brilliant master Cleverly Ehiedum Odion-Oligie";    
+      }
+      return null;              
+    }              
+      
+    async function sendMessage() {              
+      const text = userInput.value.trim();              
+      if (!text) return;              
+          
+      appendMessage("user", text, messageHistory.length);              
+      messageHistory.push({ role: "user", content: text });              
+      saveChatHistory();              
+      userInput.value = "";              
+      sendBtn.disabled = true;              
+          
+      const special = checkForSpecialResponses(text);              
+      if (special) {              
+        appendMessage("assistant", special, messageHistory.length);              
+        messageHistory.push({ role: "assistant", content: special });              
+        saveChatHistory();              
+        return;              
+      }              
+          
+      const typingDiv = document.createElement("div");              
+      typingDiv.className = "message ai-message typing";              
+      typingDiv.innerHTML = "<span></span><span></span><span></span>";              
+      chatBody.appendChild(typingDiv);              
+      chatBody.scrollTop = chatBody.scrollHeight;              
+          
+      try {              
+        const res = await fetch("https://api.openai.com/v1/chat/completions", {              
+          method: "POST",              
+          headers: {              
+            "Content-Type": "application/json",              
+            "Authorization": `Bearer ${OPENAI_API_KEY}`              
+          },              
+          body: JSON.stringify({              
+            model: "gpt-4o-mini",              
+            messages: [              
+              ...messageHistory,              
+              { role: "system", content: "You are a deeply emotionally intelligent assistant. Respond with warmth, empathy, and genuine understanding." }              
+            ]              
+          })              
+        });              
+            
+        const data = await res.json();              
+        typingDiv.remove();              
+            
+        if (data.error) {              
+          const err = `Error: ${data.error.message}`;              
+          appendMessage("assistant", err, messageHistory.length);              
+          messageHistory.push({ role: "assistant", content: err });              
+          saveChatHistory();              
+          return;              
+        }              
+            
+        const reply = data.choices[0].message.content.trim();              
+        appendMessage("assistant", reply, messageHistory.length);              
+        messageHistory.push({ role: "assistant", content: reply });              
+        saveChatHistory();              
+      } catch (e) {              
+        typingDiv.textContent = " No Network no service, come  back when you  have data or when you are serious ✌️✌️✌️ ";              
+        console.error(e);              
+      }              
+    }              
+      
+    sendBtn.addEventListener("click", sendMessage);              
+      
+    userInput.addEventListener("input", () => {              
+      sendBtn.disabled = userInput.value.trim() === "";              
+    });              
+      
+    userInput.addEventListener("keypress", e => {              
+      if (e.key === "Enter" && !sendBtn.disabled) {              
+        e.preventDefault();              
+        sendMessage();              
+      }              
+    });              
+      
+    toggleDark.addEventListener("click", () => {
+      document.body.classList.toggle("dark-mode");
+      // Save dark mode preference
+      const isDark = document.body.classList.contains("dark-mode");
+      localStorage.setItem("cleverlyDarkMode", isDark ? "1" : "0");
+    });
+      
+    deleteAllBtn.addEventListener("click", () => {              
+      if (confirm("Delete all messages?")) {              
+        messageHistory = [];              
+        saveChatHistory();              
+        loadChatHistory();              
+      }              
+    });              
+
+    // Load dark mode preference
+    if (localStorage.getItem("cleverlyDarkMode") === "1") {
+      document.body.classList.add("dark-mode");
+    }
+
+    loadChatHistory();  
+  </script>    
+</body>    
+</html>
